@@ -1,5 +1,6 @@
 var fs = require('fs');
 var chanceModule = require('./lib/chance');
+var moment = require('./lib/moment');
 eval(fs.readFileSync('lib/csvsup.js')+'');
 eval(fs.readFileSync('lib/strsup.js')+'');
 
@@ -89,6 +90,19 @@ function genData(columns, rows)
                                t = t.getFullYear() + ("0" + (t.getMonth() + 1)).slice(-2) + ("0" + t.getDate()).slice(-2);
                                s += t;
                                break;
+                     case '5' : t = moment().format();
+                               s += t;
+                               break;
+                     case '6' : t = moment().toDate().toISOString();
+                                 s += t;
+                                 break;     
+                     case '7' : t = moment().utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
+                                 s += t;
+                                 break;
+                     case '8' :  t = chance.date({year: year});
+                                 t1 = moment(t).utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
+                                 s += t1;
+                                 break;                               
                       default: s += chance.date({string: true, year: year}).toCsv(CSV.delimiter);break;
                    }
                    break;
@@ -122,6 +136,18 @@ function genData(columns, rows)
                    break;
                 case 'integer' : 
                    s += chance.integer({min: -999999, max: 999999});
+                   break;
+               case 'gst' : 
+                   s += chance.integer({min: 0, max: 100});
+                   break;
+               case 'percent' : 
+                   s += chance.integer({min: 0, max: 100});
+                   break;
+               case 'discount' : 
+                   s += chance.integer({min: 0, max: 100});
+                   break;
+               case 'cost' : 
+                   s += chance.integer({min: 0, max: 999999});
                    break;
                 case 'last' : 
                    s += chance.last().toCsv(CSV.delimiter);
@@ -212,6 +238,15 @@ function genData(columns, rows)
                 case 'yn' : 
                    s += chance.character({pool: 'YN'});
                    break;
+               case 'country':
+                  s += chance.country({ full: true });
+                  break;
+               case 'currency':
+                  s += chance.currency().code;
+                  break;
+               case 'empty':
+                     s += '';
+                     break;
                 default:
                    fld=columns[k];
                    if(fld=="FIELD"+(k+1))fld="";
@@ -228,14 +263,16 @@ function genData(columns, rows)
     return s;
 }
 
-var dataRowsRequired = process.argv[3];
+var dataRowsRequired = process.argv[4];
 var chunkSize = 1000;
-var columns = process.argv[2].split(',');
+var columns = process.argv[3].split(',');
+var columnsName = process.argv[2].split(',');
 
 console.log('dataRowsRequired', dataRowsRequired);
 console.log('columns', columns);
+console.log('columnsName', columnsName);
 
-var outputFileName = process.argv.length > 4? process.argv[4]: 'out.csv';
+var outputFileName = process.argv.length > 5? process.argv[5]: 'out.csv';
 if (fs.existsSync(outputFileName)){
 	fs.unlinkSync(outputFileName);
 }
@@ -248,6 +285,9 @@ var loop = function (index) {
 		let remainder = dataRowsRequired - index;
 		let size = chunkSize>remainder ? remainder: chunkSize;
 		let csvStringPart = genData(columns, size);
+      if(index == 0){
+         csvStringPart = columnsName+"\n"+csvStringPart;
+      }
 		console.log("Appending csv part ", index ," of size ", size);
 		fs.appendFile(outputFileName, csvStringPart, function (err) {
 			if(err) {
