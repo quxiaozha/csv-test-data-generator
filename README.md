@@ -6,7 +6,8 @@ When you generate test data online at http://www.convertcsv.com/generate-test-da
 
  ## Usage
 
-```node generator.js <COLUMNS_DEFINITION NUMBER_OF_ROWS> <OUT_FILE>```
+```node generator.js <COLUMNS_NAME_IN_CSV COLUMNS_DEFINITION NUMBER_OF_ROWS> <OUT_FILE>```
+`COLUMNS_NAME_IN_CSV` - column name in csv file
 
 `COLUMNS_DEFINITION` - columns definition from http://www.convertcsv.com/generate-test-data.htm (or see below "Allowed Keywords")
 
@@ -17,7 +18,7 @@ When you generate test data online at http://www.convertcsv.com/generate-test-da
 ### Command example:
 
 ```
-node generator.js "email,first,last,age,street,city,state,zip,digid,date(3),latitude,longitude,pick(RED|BLUE|YELLOW|GREEN|WHITE),string" 10000 out1.csv
+node generator.js "email,age,street,createtime,colour,note" "email,age,street,date(3),pick(RED|BLUE|YELLOW|GREEN|WHITE),string" 10 out1.csv
 ```
 
 
@@ -49,6 +50,8 @@ or date(4):			date in mm/dd/yyyy format or
 date(2) for dd/mm/yyyy 
 or date(3) for yyyy/mm/dd 
 or date(4) for yyyymmdd
+or date(7)/date(8) for YYYY-MM-DDTHH:mm:ss[Z]
+
 digit
 digit(n):			digit - 5-20 digits
 
